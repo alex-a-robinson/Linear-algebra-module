@@ -1,3 +1,6 @@
+from copy import copy, deepcopy
+import math
+
 def matrixCorrectlyFormed(data):
 	"""
 	Returns True if data is a valid input for matrix else False
@@ -125,9 +128,9 @@ def ones(s):
 		randi()
 	
 	# Example
-	>>> ones((2, 2))
-	[[1, 1],
-	 [1, 1]]
+		>>> ones((2, 2))
+		[[1, 1],
+	 	 [1, 1]]
 	"""
 	a = []
 	for r in range(s[0]):
@@ -153,9 +156,9 @@ def zeros(s):
 		randi()
 	
 	# Example
-	>>> zeros((2, 2))
-	[[0, 0],
-	 [0, 0]]
+		>>> zeros((2, 2))
+		[[0, 0],
+	 	 [0, 0]]
 	"""
 	a = []
 	for r in range(s[0]):
@@ -181,10 +184,10 @@ def rand(s):
 		ones()
 	
 	# Example
-	>>> rand((2, 3))
-	[[0.7781743846171062, 0.9439050707800642],
-	 [0.2291032645819474, 0.24129115399154177],
-	 [0.7946940974609309, 0.12921377900306463]]
+		>>> rand((2, 3))
+		[[0.7781743846171062, 0.9439050707800642],
+	 	 [0.2291032645819474, 0.24129115399154177],
+	 	 [0.7946940974609309, 0.12921377900306463]]
 	"""
 	a = []
 	for r in range(s[0]):
@@ -214,9 +217,9 @@ def randi(s, l, u):
 		rand()
 	
 	# Example
-	>>> randm((2, 2), 0, 10)
-	[[3, 8],
-	 [4, 1]]
+		>>> randm((2, 2), 0, 10)
+		[[3, 8],
+	 	 [4, 1]]
 	"""
 	a = []
 	for r in range(s[0]):
@@ -236,12 +239,12 @@ def isSquareSize(s):
 		Boolean : True if s represents the size of a square matrix
 	
 	# Example
-	>>> s = (2, 3)
-	>>> isSquareSize(s)
-	False
-	>>> s = (4, 4)
-	>>> isSquareSize(s)
-	True
+		>>> s = (2, 3)
+		>>> isSquareSize(s)
+		False
+		>>> s = (4, 4)
+		>>> isSquareSize(s)
+		True
 	"""
 	if s[0] == s[1]:
 		return True
@@ -259,10 +262,10 @@ def identity(s):
 		a matrix object
 	
 	# Example
-	>>> s = (2, 2)
-	>>> identity(s)
-	[[1, 0],
-	 [0, 1]]
+		>>> s = (2, 2)
+		>>> identity(s)
+		[[1, 0],
+	 	 [0, 1]]
 	"""
 	if not isSquareSize(s):
 		raise Exception(s, "Identiy matrix must be a square matrix")
@@ -270,12 +273,48 @@ def identity(s):
 	for i in range(s[0]):
 		m[i][i] = 1
 	return m
-		
 
-def inverse(m):
+def determinant(m):
+	"""
+	Returns the determinant of the matrix m
+	
+	# Parameters
+		m : a matrix object 
+	
+	# Returns
+		int
+	
+	# Example
+		>>>m = matrix([[1, 1, 2],
+		... 		   [2, 3, 4],
+		...			   [3, 4, 5])
+		>>>determinant(m)
+		-1.0
+	"""
+	if not isinstance(m, matrix) or (not isSquareSize(m.size)):
+		raise Exception(m.size, "Type must be matrix and it must be a square matrix")
+	
+	if m.size == (1, 1):
+		return m[0][0]
+	
+	terms = []
+	if m.numCols > 2:
+		for j in range(m.numCols):
+			a = deepcopy(m)
+			del a[0]
+			a.delColumn(j)
+			multiplier = m[0][j] * math.pow(-1, (2+j))
+			det = determinant(a)
+			terms.append(multiplier*det)
+		return sum(terms)
+	else:
+		return(m[0][0]*m[1][1] - m[0][1]*m[1][0])
+			
+	
+def transpose(m):
 	pass
 
-def detterminant(m):
+def inverse(m):
 	pass
 
 def normalize(m):
@@ -317,6 +356,9 @@ class matrix():
 		for row in self.amatrix:
 			size += len(row)
 		return size
+	
+	def __delitem__(self, i):
+		del self.amatrix[i]
 			
 	def __iter__(self):
 		for row in self.amatrix:
@@ -426,7 +468,6 @@ class matrix():
 	
 	def __rturediv__(self, other):
 		return self.__div__(other, self)
-
 	
 	@property
 	def numRows(self):
@@ -556,6 +597,56 @@ class matrix():
 		
 	col = column
 	
+	def delRow(self, i):
+		"""
+		Deletes the row i from the matrix
+		
+		# Parameters
+			i : int
+				The index of the row which will be deleted
+		
+		# See Also
+			self.delColumn()
+			self.delCol()
+
+		# Example
+			>>> m = matrix([[1, 2],
+			... 			[3, 4],
+			... 			[5, 6]])
+			>>> m.delRow(0)
+			>>> print(m)
+			[[3, 4],
+			 [5, 6]]
+		"""
+		del self.amatrix[i]
+		
+	def delColumn(self, i):
+		"""
+		Deletes the column i from the matrix
+		
+		# Parameters
+			i : int
+				The index of the column which will be deleted
+		
+		# See Also
+			self.delCol()
+			self.delRow()
+
+		# Example
+			>>> m = matrix([[1, 2],
+			... 			[3, 4],
+			... 			[5, 6]])
+			>>> m.delColumn(0)
+			>>> print(m)
+			[[2],
+			 [4],
+			 [6]]
+		"""
+		for x in range(self.numRows):
+			del self.amatrix[x][i]
+	
+	delCol = delColumn
+	
 	@property
 	def rows(self):
 		"""
@@ -628,7 +719,24 @@ class matrix():
 		for row in self.amatrix:
 			for item in row:
 				s += item
-		return s			
+		return s
+		
+	@property
+	def determinant(self):
+		"""
+		Returns the determinant of the matrix
+
+		# Returns
+			int
+
+		# Example
+			>>>m = matrix([[1, 1, 2],
+			... 		   [2, 3, 4],
+			...			   [3, 4, 5])
+			>>>m.determinant
+			-1.0
+		"""
+		return determinant(self)		
 	
 	def flatten(self):
 		"""

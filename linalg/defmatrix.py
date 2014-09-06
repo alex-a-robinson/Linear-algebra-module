@@ -53,6 +53,24 @@ def dot(a, b):
 			result[r][c] = sum([a*b for a,b in zip(row, col)])
 	return result
 
+def mean(m):
+	"""
+	Returns the mean value of a matrix
+	
+	# Parameters
+		m : matrix object
+	
+	# Returns
+		The mean value in the matrix
+	
+	# Example
+		>>> a = matrix([[1, 2],
+		... 			[3, 4])
+		>>> mean(a)
+		2.5
+	"""
+	return sum(flatten(m)) / len(m)
+
 def shape(m, s):
 	"""
 	Returns a matrix reshaped to a certin size
@@ -79,7 +97,7 @@ def shape(m, s):
 	
 	if sum(m.size) != sum(s):
 		raise(Exception(s, "Both shapes must have the same number of elements"))
-			
+	
 	f = flatten(m)
 	rows = []
 	for r in range(s[0]):
@@ -88,7 +106,7 @@ def shape(m, s):
 			row.append(f[r * s[1] + c])
 		rows.append(row)
 	return matrix(rows)
-		
+
 
 def flatten(m):
 	"""
@@ -137,8 +155,8 @@ def ones(s):
 		a.append([])
 		for c in range(s[1]):
 			a[r].append(1)
-	return matrix(a) 
-	
+	return matrix(a)
+
 def zeros(s):
 	"""
 	Returns a matrix of size s filled with 0s
@@ -195,7 +213,7 @@ def rand(s):
 		for c in range(s[1]):
 			a[r].append(random.random())
 	return matrix(a)
-	
+
 def randi(s, l, u):
 	"""
 	Returns a matrix of size s filled with random numbers between l and u
@@ -267,10 +285,8 @@ def identity(s):
 		[[1, 0],
 	 	 [0, 1]]
 	"""
-	if not isSquareSize(s):
-		raise Exception(s, "Identiy matrix must be a square matrix")
 	m = zeros(s)
-	for i in range(s[0]):
+	for i in range(min(s[0], s[1])):
 		m[i][i] = 1
 	return m
 
@@ -279,7 +295,7 @@ def determinant(m):
 	Returns the determinant of the matrix m
 	
 	# Parameters
-		m : a matrix object 
+		m : a matrix object
 	
 	# Returns
 		int
@@ -309,23 +325,91 @@ def determinant(m):
 		return sum(terms)
 	else:
 		return(m[0][0]*m[1][1] - m[0][1]*m[1][0])
-			
 	
+
 def transpose(m):
-	pass
+	"""
+	Returns the matrix m transposed
+	
+	# Parameters
+		m : a matrix object
+	
+	# Returns
+		matrix object
+	
+	# Example
+		>>>m = matrix([[1, 1, 2],
+		... 		   [2, 3, 4],
+		...			   [3, 4, 5])
+		>>>transpose(m)
+		[[1, 2, 3],
+		 [1, 3, 4],
+		 [2, 4, 5]]
+	"""
+	trans = []
+	for c in range(m.numCols):
+		row = []
+		for r in range(m.numRows):
+			row.append(m[r][c])
+		trans.append(row)
+	return matrix(trans)
 
 def inverse(m):
-	pass
+	"""
+	Returns inverse of the matrix m
+	
+	# Parameters
+		m : a matrix object
+	
+	# Returns
+		matrix object
+	
+	# Example
+		>>>m = matrix([[1, 1, 2],
+		... 		   [2, 3, 4],
+		...			   [3, 4, 5])
+		>>>inverse(m) #TODO
+	
+	# Notes
+		Implmentation of Gauss-Jordan Elimination
+	"""
+	a = deepcopy(m)
+	ident = identity(a.size)
+	#TODO
+
+def swapRows(m, a, b):
+	"""
+	Returns a copy of matrix m where row a and b are swaped
+	
+	# Parameters
+		m : a matrix object
+		a, b : indices of rows to swap
+	
+	# Returns
+		matrix object
+	
+	# Example
+		>>>m = matrix([[1, 1, 2],
+		... 		   [2, 3, 4],
+		...			   [3, 4, 5])
+		>>>swap(m, 0, 2)
+		[[3, 4, 5],
+		 [2, 3, 4],
+		 [1, 1, 2]]
+	"""
+	o = deepcopy(m)
+	o[a], o[b] = o[b], o[a]
+	return o
 
 def normalize(m):
 	pass
-	
+
 def eigenvalues(m):
 	pass
 
 def eigenvectors(m):
 	pass
-	
+
 def rot90(m):
 	pass
 
@@ -336,11 +420,11 @@ def kronecker_tensor_product(m):
 	pass
 
 class matrix():
-
+	
 	def __init__(self, data):
 		if not matrixCorrectlyFormed(data):
 			raise Exception(data, "Matrix not correctly formed")
-		self.amatrix = data			
+		self.amatrix = data
 	
 	def __str__(self):
 		prettyMatrix = []
@@ -350,7 +434,7 @@ class matrix():
 	
 	def __repr__(self):
 		return str(self)
-
+	
 	def __len__(self):
 		size = 0
 		for row in self.amatrix:
@@ -359,7 +443,7 @@ class matrix():
 	
 	def __delitem__(self, i):
 		del self.amatrix[i]
-			
+	
 	def __iter__(self):
 		for row in self.amatrix:
 			for item in row:
@@ -384,7 +468,7 @@ class matrix():
 				for colIndex in range(self.numCols):
 					a = self[rowIndex][colIndex]
 					result[rowIndex][colIndex] = a + other
-					
+		
 		elif isinstance(other, matrix):
 			for rowIndex in range(self.numRows):
 				for colIndex in range(self.numCols):
@@ -393,13 +477,13 @@ class matrix():
 					result[rowIndex][colIndex] = a + b
 		
 		else:
-			raise Exception(other, "Must be of type matrix or int,float,complex")			
-					
+			raise Exception(other, "Must be of type matrix or int,float,complex")
+		
 		return result
 	
 	def __radd__(self, other):
 		return self.__add__(other)
-		
+	
 	def __sub__(self, other):
 		result = zeros(self.size)
 		if isinstance(other, (int, float, complex)):
@@ -407,22 +491,22 @@ class matrix():
 				for colIndex in range(self.numCols):
 					a = self[rowIndex][colIndex]
 					result[rowIndex][colIndex] = a - other
-
+		
 		elif isinstance(other, matrix):
 			for rowIndex in range(self.numRows):
 				for colIndex in range(self.numCols):
 					a = self[rowIndex][colIndex]
 					b = other[rowIndex][colIndex]
 					result[rowIndex][colIndex] = a - b
-
+		
 		else:
-			raise Exception(other, "Must be of type matrix or int,float,complex")			
-
+			raise Exception(other, "Must be of type matrix or int,float,complex")
+		
 		return result
 	
 	def __rsub__(self, other): # ToDO; This will break if using scalers rather than matrix matrix
 		return self.__sub__(other, self)
-		
+	
 	def __mul__(self, other):
 		result = zeros(self.size)
 		if isinstance(other, (int, float, complex)):
@@ -430,7 +514,7 @@ class matrix():
 				for colIndex in range(self.numCols):
 					a = self[rowIndex][colIndex]
 					result[rowIndex][colIndex] = a * other
-					
+		
 		elif isinstance(other, matrix):
 			for rowIndex in range(self.numRows):
 				for colIndex in range(self.numCols):
@@ -439,13 +523,13 @@ class matrix():
 					result[rowIndex][colIndex] = a * b
 		
 		else:
-			raise Exception(other, "Must be of type matrix or int,float,complex")			
-					
-		return result 
+			raise Exception(other, "Must be of type matrix or int,float,complex")
+		
+		return result
 	
 	def __rmul__(self, other):
 		return self.__mul__(other)
-		
+	
 	def __truediv__(self, other):
 		result = zeros(self.size)
 		if isinstance(other, (int, float, complex)):
@@ -453,21 +537,25 @@ class matrix():
 				for colIndex in range(self.numCols):
 					a = self[rowIndex][colIndex]
 					result[rowIndex][colIndex] = a / other
-
+		
 		elif isinstance(other, matrix):
 			for rowIndex in range(self.numRows):
 				for colIndex in range(self.numCols):
 					a = self[rowIndex][colIndex]
 					b = other[rowIndex][colIndex]
 					result[rowIndex][colIndex] = a / b
-
+		
 		else:
-			raise Exception(other, "Must be of type matrix or int,float,complex")			
-
-		return result 
+			raise Exception(other, "Must be of type matrix or int,float,complex")
+		
+		return result
 	
 	def __rturediv__(self, other):
 		return self.__div__(other, self)
+	
+	def addRowList(self, r, l): #TODO
+		for i in l:
+			self[r].append(i)
 	
 	@property
 	def numRows(self):
@@ -481,7 +569,7 @@ class matrix():
 			self.numColumns()
 			self.size()
 			self.numCols()
-
+		
 		# Example
 			>>> m = matrix([[1, 2],
 			... 			[3, 4],
@@ -490,7 +578,7 @@ class matrix():
 			3
 		"""
 		return len(self.amatrix)
-		
+	
 	@property
 	def numColumns(self):
 		"""
@@ -503,7 +591,7 @@ class matrix():
 			self.numRows()
 			self.size()
 			self.numCols()
-
+		
 		# Example
 			>>> m = matrix([[1, 2],
 			... 			[3, 4],
@@ -527,7 +615,7 @@ class matrix():
 			self.numRows()
 			self.numColumns()
 			self.numCols()
-
+		
 		# Example
 			>>> m = matrix([[1, 2],
 			... 			[3, 4],
@@ -554,7 +642,7 @@ class matrix():
 			self.cols()
 			self.columns()
 			self.rows()
-
+		
 		# Example
 			>>> m = matrix([[1, 2],
 			... 			[3, 4])
@@ -581,7 +669,7 @@ class matrix():
 			self.columns()
 			self.row()
 			self.rows()
-
+		
 		# Example
 			>>> m = matrix([[1, 2],
 			... 			[3, 4])
@@ -594,7 +682,7 @@ class matrix():
 		for row in self.amatrix:
 			col.append(row[n])
 		return col
-		
+	
 	col = column
 	
 	def delRow(self, i):
@@ -608,7 +696,7 @@ class matrix():
 		# See Also
 			self.delColumn()
 			self.delCol()
-
+		
 		# Example
 			>>> m = matrix([[1, 2],
 			... 			[3, 4],
@@ -619,7 +707,7 @@ class matrix():
 			 [5, 6]]
 		"""
 		del self.amatrix[i]
-		
+	
 	def delColumn(self, i):
 		"""
 		Deletes the column i from the matrix
@@ -631,7 +719,7 @@ class matrix():
 		# See Also
 			self.delCol()
 			self.delRow()
-
+		
 		# Example
 			>>> m = matrix([[1, 2],
 			... 			[3, 4],
@@ -654,14 +742,14 @@ class matrix():
 		
 		# Returns
 			An list of lists of items in each row
-			
+		
 		# See Also
 			self.cols()
 			self.columns()
 			self.col()
 			self.column()
 			self.row()
-
+		
 		# Example
 			>>> m = matrix([[1, 2],
 			... 			[3, 4])
@@ -687,7 +775,7 @@ class matrix():
 			self.col()
 			self.column()
 			self.row()
-
+		
 		# Example
 			>>> m = matrix([[1, 2],
 			... 			[3, 4])
@@ -699,7 +787,50 @@ class matrix():
 			a.append(self.col(i))
 		return a
 	
-	cols = columns 
+	cols = columns
+	
+	def swapRows(self, a, b): #TODO: swapColumns
+		"""
+		Swaps rows a and b in the matrix
+		
+		# Parameters
+			a, b : indices of rows to swap
+		
+		# Example
+			>>>m = matrix([[1, 1, 2],
+			... 		   [2, 3, 4],
+			...			   [3, 4, 5])
+			>>>m.swap(0, 2)
+			>>>print(m)
+			[[3, 4, 5],
+			 [2, 3, 4],
+			 [1, 1, 2]]
+		"""
+		self = swapRows(self, a, b)
+	
+	def zerosBellow(self, i):
+		"""
+		Checks matrix to see if only zeros exist at or below the index i (row, column)
+		
+		# Parameters
+			i : tuple (row, column)
+		
+		# Return
+			zeroSum : An int containg the count of non zero items
+			indexOfFirstNonZero : An int contaning the index of the first non zero value
+		
+		# Example
+			#TODO
+		"""
+		nonZeros = []
+		indexOfFirstNonZero = -1
+		for m in range(i[0], self.numRows):
+			nonZero = self[m][i[1]] != 0
+			nonZeros.append(nonZero)
+			if indexOfFirstNonZero == -1 and nonZero:
+				indexOfFirstNonZero = m
+		zeroSum = sum(nonZeros)
+		return zeroSum, indexOfFirstNonZero
 	
 	@property
 	def sum(self):
@@ -708,7 +839,7 @@ class matrix():
 		
 		# Returns
 			A number (int, float..)
-
+		
 		# Example
 			>>> m = matrix([[1, 2],
 			... 			[3, 4])
@@ -720,15 +851,62 @@ class matrix():
 			for item in row:
 				s += item
 		return s
+	
+	@property
+	def mean(self):
+		"""
+		Returns the mean value of a matrix
 		
+		# Returns
+			The mean value in the matrix
+		
+		# Example
+			>>> a = matrix([[1, 2],
+			... 			[3, 4])
+			>>> a.mean
+			2.5
+		"""
+		return mean(self)
+	
+	def min(self):
+		"""
+		Returns the minimum valued item in the matrix
+		
+		# Returns
+			Number
+		
+		# Example
+			>>>a = matrix([[4, 2, 9],
+			... 		   [3, 6, 12]])
+			>>>a.min
+			2
+		"""
+		return min(flatten(self))
+	
+	def max(self):
+		"""
+		Returns the maximum valued item in the matrix
+		
+		# Returns
+			Number
+		
+		# Example
+			>>>a = matrix([[4, 2, 9],
+			... 		   [3, 6, 12]])
+			>>>a.max
+			12
+		"""
+		return max(flatten(self))
+		
+	
 	@property
 	def determinant(self):
 		"""
 		Returns the determinant of the matrix
-
+		
 		# Returns
 			int
-
+		
 		# Example
 			>>>m = matrix([[1, 1, 2],
 			... 		   [2, 3, 4],
@@ -736,12 +914,12 @@ class matrix():
 			>>>m.determinant
 			-1.0
 		"""
-		return determinant(self)		
+		return determinant(self)
 	
 	def flatten(self):
 		"""
 		Flatens the matrix into a 1xn matrix
-
+		
 		# Example
 			>>> m = matrix([[1, 2],
 			... 			[3, 4])
@@ -757,7 +935,7 @@ class matrix():
 		
 		# See Also
 			flatten()
-
+		
 		# Example
 			>>> m = matrix([[1, 2],
 			... 			[3, 4])
@@ -765,18 +943,18 @@ class matrix():
 			[[1, 2], [3, 4]]
 		"""
 		return self.amatrix
-		
+	
 	def reshape(self, s):
 		"""
 		Reshapes the matrix into new size
-
+		
 		# Parameters
 			m : matrix object
 			s : tuple (number of rows, number of columns)
-
+		
 		# See Also
 			shape()
-
+		
 		# Example
 			>>> m = matrix([[1, 2],
 			... 			[3, 4])
@@ -789,4 +967,23 @@ class matrix():
 			 [4]]
 		"""
 		self = shape(self, s)
+	
+	def transpose(self):
+		"""
+		Transposes the matrix
 		
+		# Example
+			>>>m = matrix([[1, 1, 2],
+			... 		   [2, 3, 4],
+			...			   [3, 4, 5])
+			>>>m.transpose()
+			>>>print(m)
+			[[1, 2, 3],
+			 [1, 3, 4],
+			 [2, 4, 5]]
+		"""
+		self = transpose(self)
+
+a = matrix([[-1, 3, -3], [0, -6, 5], [-5, -3, 1]])
+print(invert([[-1, 3, -3], [0, -6, 5], [-5, -3, 1]]))
+#inverse(a)
